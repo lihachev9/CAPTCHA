@@ -8,7 +8,7 @@ jobs:
         id: cache-source-data
         uses: actions/cache@v3
         with:
-          path: captcha-version-2-images
+          path: assets/source-data
           key: source-dataset
 
       # Download dataset
@@ -25,7 +25,7 @@ jobs:
 
           mkdir -p assets/source-data/
           sudo apt-get install unzip
-          unzip captcha-version-2-images.zip -d ./captcha-version-2-images
+          unzip captcha-version-2-images.zip -d ./assets/source-data/
 
   train-model:
     runs-on: ubuntu-latest
@@ -33,7 +33,7 @@ jobs:
     steps:
       - name: checkout repo
         if: steps.cache-subsets.outputs.cache-hit != 'true'
-        uses: actions/checkout@v2  # cwd: /home/runner/work/ahri/ahri
+        uses: actions/checkout@master  # cwd: /home/runner/work/ahri/ahri
 
       - name: cache source data
         if: steps.cache-subsets.outputs.cache-hit != 'true'
@@ -45,4 +45,5 @@ jobs:
 
       - name: train model
         run: |
-          docker run --gpus all -it --rm -v $PWD:/srv -w /srv tensorflow/tensorflow:latest-gpu python main.py
+          docker build -q -t local .
+          docker run --gpus all -it local python ./main.py
