@@ -48,7 +48,7 @@ jobs:
         
       - name: train model
         run: |
-          winpty docker run --gpus all -it --rm -v "${pwd}:/tmp" -w /tmp tensorflow/tensorflow:latest-gpu python ./build_dataset.py
+          docker run --gpus all -it --rm -v "$(pwd):/tmp" -w /tmp tensorflow/tensorflow:latest-gpu python ./build_dataset.py
 
   train-model:
     runs-on: self-hosted
@@ -63,7 +63,7 @@ jobs:
 
       - name: train model
         run: |
-          winpty docker run --gpus all -it --rm -v "${pwd}:/tmp" -w /tmp tensorflow/tensorflow:latest-gpu python ./main.py
+          docker run --gpus all -it --rm -v "${pwd}:/tmp" -w /tmp tensorflow/tensorflow:latest-gpu python ./main.py
 
       - name: trained model
         uses: actions/upload-artifact@v3
