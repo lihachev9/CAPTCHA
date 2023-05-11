@@ -38,8 +38,8 @@ ____
 ____
 ### Component diagram
 
-![Component diagram](./img/Component diagram.png)
+![Component diagram](./img/Component_diagram.png)
 
 ### Activity diagram
 
-![Activity diagram](./img/Activity diagram.png)
+![Activity diagram](./img/Activity_diagram.png)
