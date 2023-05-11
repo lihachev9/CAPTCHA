@@ -1,17 +1,13 @@
 
 import os
-from pathlib import Path
 
 import numpy as np
 
 import tensorflow as tf
 
 
-# Path to the data directory
-data_dir = Path("samples")
-
 # Get list of all the images
-images = sorted(list(map(str, list(data_dir.glob("*.png")))))
+images = sorted(x for x in os.listdir('samples') if x.endswith('.png'))
 labels = [img.split(os.path.sep)[-1].split(".png")[0] for img in images]
 characters = set(char for label in labels for char in label)
 characters = sorted(list(characters))
