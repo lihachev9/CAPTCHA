@@ -87,5 +87,5 @@ validation_dataset = (
     .prefetch(buffer_size=tf.data.AUTOTUNE)
 )
 
-train_dataset.save('train_dataset')
-validation_dataset.save('validation_dataset')
+train_dataset.save('assets/subsets/train_dataset')
+validation_dataset.save('assets/subsets/validation_dataset')
