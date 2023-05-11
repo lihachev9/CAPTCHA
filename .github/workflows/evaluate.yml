@@ -41,7 +41,7 @@ jobs:
 
       - name: train model
         run: |
-          docker run --gpus all -it --rm -v "$(docker volume ls -qf name=act-evaluate-build-dataset  | head -n 1):/tmp" -w /tmp tensorflow/tensorflow:latest-gpu python ./build_dataset.py
+          docker run --gpus all -it --rm -v "${pwd}:/tmp" -w /tmp tensorflow/tensorflow:latest-gpu python ./build_dataset.py
           sudo apt install zip
           zip -r dataset.zip train_dataset validation_dataset
 
@@ -76,4 +76,4 @@ jobs:
         run: |
           sudo apt-get install unzip
           unzip dataset.zip
-          docker run --gpus all -it --rm -v "$(docker volume ls -qf name=act-evaluate-train-model  | head -n 1):/tmp" -w /tmp tensorflow/tensorflow:latest-gpu python ./main.py
+          docker run --gpus all -it --rm -v "${pwd}:/tmp" -w /tmp tensorflow/tensorflow:latest-gpu python ./main.py
