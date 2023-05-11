@@ -6,8 +6,14 @@ jobs:
     steps:
       # Download dataset
       - name: download source data
+        env:
+          KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
+          KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
         run: |
-          curl -LO https://github.com/AakashKumarNain/CaptchaCracker/raw/master/captcha_images_v2.zip
+          pip install kaggle
+          mkdir $HOME/.kaggle
+          echo {"username":"$env:KAGGLE_USERNAME","key":"$env:KAGGLE_KEY"} > $HOME/.kaggle/kaggle.json
+          kaggle datasets download -d fournierp/captcha-version-2-images
 
       - name: Save Artifact
         uses: actions/upload-artifact@v3
@@ -26,7 +32,8 @@ jobs:
 
       - name: train model
         run: |
-          python ./build_dataset.py
+          7z x captcha-version-2-images.zip
+          py build_dataset.py
           7z a dataset.7z train_dataset validation_dataset
 
       - name: Save dataset
@@ -47,7 +54,7 @@ jobs:
       - name: train model
         run: |
           7z x dataset.7z
-          python ./main.py
+          py main.py
 
       - name: trained model
         uses: actions/upload-artifact@v3
