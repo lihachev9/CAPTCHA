@@ -4,65 +4,47 @@ jobs:
   pull:
     runs-on: ubuntu-latest
     steps:
-      - name: cache source data
-        id: cache-source-data
-        uses: actions/cache@v3
-        with:
-          path: assets/source-data
-          key: source-dataset
-
       # Download dataset
       - name: download source data
-        if: steps.cache-source-data.outputs.cache-hit != 'true'
         env:
           KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
           KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
         run: |
-          pip install kaggle
-          mkdir $HOME/.kaggle
-          echo {"username":"$env:KAGGLE_USERNAME","key":"$env:KAGGLE_KEY"} > $HOME/.kaggle/kaggle.json
-          kaggle datasets download -d fournierp/captcha-version-2-images
+          curl -LO https://github.com/AakashKumarNain/CaptchaCracker/raw/master/captcha_images_v2.zip
+
+      - name: Save Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: source-data
+          path: captcha-version-2-images.zip
 
   build-dataset:
     runs-on: self-hosted
     needs: pull
     steps:
-      - name: cache subsets
-        id: cache-subsets
-        uses: actions/cache@v3
-        with:
-          path: assets/subsets
-          key: subsets
-
-      - name: checkout repo
-        if: steps.cache-subsets.outputs.cache-hit != 'true'
-        uses: actions/checkout@master  # cwd: /home/runner/work/ahri/ahri
-
-      - name: cache source data
-        if: steps.cache-subsets.outputs.cache-hit != 'true'
-        id: cache-source-data
-        uses: actions/cache@v3
-        with:
-          path: assets/source-data
-          key: source-dataset
-        
       - name: train model
         run: |
-          python ./build_dataset.py
+          python ./build_dataset.
+          7z a dataset.7z train_dataset validation_dataset
+
+      - name: Save dataset
+        uses: actions/upload-artifact@v3
+        with:
+          name: dataset
+          path: dataset.7z
 
   train-model:
     runs-on: self-hosted
     needs: build-dataset
     steps:
-      - name: cache subsets
-        id: cache-subsets
-        uses: actions/cache@v3
+      - name: Download 
+        uses: actions/download-artifact@v3
         with:
-          path: assets/subsets
-          key: subsets
+          name: dataset
 
       - name: train model
         run: |
+          7z x dataset.7z
           python ./main.py
 
       - name: trained model
