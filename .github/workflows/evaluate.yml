@@ -42,14 +42,13 @@ jobs:
       - name: train model
         run: |
           docker run --gpus all -it --rm -v "${pwd}:/tmp" -w /tmp tensorflow/tensorflow:latest-gpu python ./build_dataset.py
-          sudo apt install zip
-          zip -r dataset.zip train_dataset validation_dataset
+          7z a dataset.7z train_dataset validation_dataset
 
       - name: Save dataset
         uses: actions/upload-artifact@v3
         with:
           name: dataset
-          path: dataset.zip
+          path: dataset.7z
 
 
   train-model:
@@ -74,5 +73,5 @@ jobs:
 
       - name: train model
         run: |
-          7z x dataset.zip
+          7z x dataset.7z
           docker run --gpus all -it --rm -v "${pwd}:/tmp" -w /tmp tensorflow/tensorflow:latest-gpu python ./main.py
