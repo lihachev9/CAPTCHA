@@ -74,6 +74,5 @@ jobs:
 
       - name: train model
         run: |
-          sudo apt-get install unzip
-          unzip dataset.zip
+          7z x dataset.zip
           docker run --gpus all -it --rm -v "${pwd}:/tmp" -w /tmp tensorflow/tensorflow:latest-gpu python ./main.py
