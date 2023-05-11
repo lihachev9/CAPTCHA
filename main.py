@@ -5,8 +5,8 @@ from keras import layers
 
 img_width = 200
 img_height = 50
-train_dataset = tf.data.Dataset.load('train_dataset')
-validation_dataset = tf.data.Dataset.load('validation_dataset')
+train_dataset = tf.data.experimental.load('train_dataset')
+validation_dataset = tf.data.experimental.load('validation_dataset')
 
 
 class CTCLayer(layers.Layer):
