@@ -155,7 +155,6 @@ history = model.fit(
     callbacks=[early_stopping],
 )
 
-model = model.model
 # Get the prediction model by extracting layers till the output layer
 prediction_model = keras.models.Model(
     model.get_layer(name="image").input,
