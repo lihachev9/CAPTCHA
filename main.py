@@ -120,5 +120,5 @@ prediction_model = keras.models.Model(
 prediction_model.summary()
 
 # Save the models
-model.save('train_model.h5')
-prediction_model.save('model_predict.h5')
+model.save('assets/models/train_model.h5')
+prediction_model.save('assets/models/model_predict.h5')

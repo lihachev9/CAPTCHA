@@ -33,7 +33,7 @@ jobs:
       - name: train model
         run: |
           7z x captcha-version-2-images.zip -aos
-          docker run --gpus all -it --rm -v "${pwd}:/tmp" -w /tmp tensorflow/tensorflow:latest-gpu python ./build_dataset.py
+          py build_dataset.py
           7z a dataset.7z train_dataset validation_dataset
 
       - name: Save dataset
@@ -54,7 +54,7 @@ jobs:
       - name: train model
         run: |
           7z x dataset.7z -aos
-          docker run --gpus all -it --rm -v "${pwd}:/tmp" -w /tmp tensorflow/tensorflow:latest-gpu python ./main.py
+          py main.py
 
       - name: trained model
         uses: actions/upload-artifact@v3
