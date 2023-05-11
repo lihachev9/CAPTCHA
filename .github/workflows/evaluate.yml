@@ -24,7 +24,7 @@ jobs:
     steps:
       - name: train model
         run: |
-          python ./build_dataset.
+          python ./build_dataset.py
           7z a dataset.7z train_dataset validation_dataset
 
       - name: Save dataset
