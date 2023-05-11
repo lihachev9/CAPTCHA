@@ -41,7 +41,6 @@ jobs:
 
       - name: train model
         run: |
-          unzip captcha-version-2-images.zip -d assets/source-data/
           docker run --gpus all -it --rm -v "$(docker volume ls -qf name=act-evaluate-build-dataset  | head -n 1):/tmp" -w /tmp tensorflow/tensorflow:latest-gpu python ./build_dataset.py
           sudo apt install zip
           zip -r dataset.zip train_dataset validation_dataset
