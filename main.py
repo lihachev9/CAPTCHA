@@ -3,10 +3,69 @@ from tensorflow import keras
 from keras import layers
 
 
+tf.config.run_functions_eagerly(False)
 img_width = 200
 img_height = 50
 train_dataset = tf.data.experimental.load('train_dataset')
 validation_dataset = tf.data.experimental.load('validation_dataset')
+
+
+class SAMModel(tf.keras.Model):
+    def __init__(self, model, rho=0.05):
+        """
+        p, q = 2 for optimal results as suggested in the paper
+        (Section 2)
+        """
+        super(SAMModel, self).__init__()
+        self.model = model
+        self.rho = rho
+
+    def train_step(self, data):
+        x, y = data
+        e_ws = []
+        with tf.GradientTape() as tape:
+            predictions = self.model(x)
+            loss = self.compiled_loss(y, predictions)
+        self.compiled_metrics.update_state(y, predictions)
+        trainable_params = self.model.trainable_variables
+        gradients = tape.gradient(loss, trainable_params)
+        grad_norm = self._grad_norm(gradients)
+        scale = self.rho / (grad_norm + 1e-12)
+
+        for (grad, param) in zip(gradients, trainable_params):
+            e_w = grad * scale
+            param.assign_add(e_w)
+            e_ws.append(e_w)
+
+        with tf.GradientTape() as tape:
+            predictions = self.model(x)
+            loss = self.compiled_loss(y, predictions)    
+
+        sam_gradients = tape.gradient(loss, trainable_params)
+        for (param, e_w) in zip(trainable_params, e_ws):
+            param.assign_sub(e_w)
+
+        self.optimizer.apply_gradients(
+            zip(sam_gradients, trainable_params))
+
+        return {m.name: m.result() for m in self.metrics}
+
+    def test_step(self, data):
+        x, y = data
+        predictions = self.model(x, training=False)
+        self.compiled_metrics.update_state(y, predictions)
+        return {m.name: m.result() for m in self.metrics}
+
+    def call(self, inputs):
+        return self.model(inputs)
+
+    def _grad_norm(self, gradients):
+        norm = tf.norm(
+            tf.stack([
+                tf.norm(grad) for grad in gradients if grad is not None
+            ])
+        )
+        return norm
 
 
 class CTCLayer(layers.Layer):
@@ -85,18 +144,16 @@ def build_model():
     model = keras.models.Model(
         inputs=[input_img, labels], outputs=output, name="ocr_model_v1"
     )
-    # Optimizer
-    opt = keras.optimizers.Adam()
-    # Compile the model and return
-    model.compile(optimizer=opt)
     return model
 
 
 # Get the model
 model = build_model()
+model = SAMModel(model)
+model.compile(optimizer='adam')
 
 
-epochs = 1
+epochs = 100
 early_stopping_patience = 10
 # Add early stopping
 early_stopping = keras.callbacks.EarlyStopping(
@@ -112,7 +169,7 @@ history = model.fit(
     callbacks=[early_stopping],
 )
 
-
+model = model.model
 # Get the prediction model by extracting layers till the output layer
 prediction_model = keras.models.Model(
     model.get_layer(name="image").input,
