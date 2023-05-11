@@ -34,3 +34,12 @@ ____
 ![Частота слов](./img/__results___9_0.png)
 
 Эти данные можно применить для машинного обучения нейросети распознование симвлов 
+
+____
+### Component diagram
+
+![Component diagram](./img/Component diagram.png)
+
+### Activity diagram
+
+![Activity diagram](./img/Activity diagram.png)
