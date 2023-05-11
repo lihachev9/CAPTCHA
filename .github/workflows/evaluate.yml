@@ -25,6 +25,7 @@ jobs:
     runs-on: self-hosted
     needs: pull
     steps:
+      - uses: actions/checkout@v3
       - name: Download 
         uses: actions/download-artifact@v3
         with:
