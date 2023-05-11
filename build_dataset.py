@@ -8,7 +8,7 @@ import tensorflow as tf
 
 
 # Path to the data directory
-data_dir = Path("./assets/source-data/samples")
+data_dir = Path("samples")
 
 # Get list of all the images
 images = sorted(list(map(str, list(data_dir.glob("*.png")))))
