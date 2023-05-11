@@ -6,20 +6,14 @@ jobs:
     steps:
       # Download dataset
       - name: download source data
-        env:
-          KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
-          KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
         run: |
-          pip install kaggle
-          mkdir $HOME/.kaggle
-          echo {"username":"$env:KAGGLE_USERNAME","key":"$env:KAGGLE_KEY"} > $HOME/.kaggle/kaggle.json
-          kaggle datasets download -d fournierp/captcha-version-2-images
+          curl -LO https://github.com/AakashKumarNain/CaptchaCracker/raw/master/captcha_images_v2.zip
 
       - name: Save Artifact
         uses: actions/upload-artifact@v3
         with:
           name: source-data
-          path: captcha-version-2-images.zip
+          path: captcha_images_v2.zip
 
   build-dataset:
     runs-on: self-hosted
@@ -33,7 +27,7 @@ jobs:
 
       - name: train model
         run: |
-          7z x captcha-version-2-images.zip -aos
+          7z x captcha_images_v2.zip -aos
           py build_dataset.py
           7z a dataset.7z train_dataset validation_dataset
 
@@ -60,5 +54,5 @@ jobs:
       - name: trained model
         uses: actions/upload-artifact@v3
         with:
-          name: trained-linear-svm
+          name: trained-neuron
           path: assets/models

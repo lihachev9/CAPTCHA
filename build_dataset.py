@@ -4,7 +4,7 @@ import numpy as np
 import tensorflow as tf
 
 
-data_dir = Path("./samples/")
+data_dir = Path("./captcha_images_v2/")
 
 # Get list of all the images
 images = sorted(list(map(str, list(data_dir.glob("*.png")))))
