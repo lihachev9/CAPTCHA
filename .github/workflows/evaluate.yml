@@ -23,12 +23,14 @@ jobs:
           echo {"username":"$env:KAGGLE_USERNAME","key":"$env:KAGGLE_KEY"} > $HOME/.kaggle/kaggle.json
           kaggle datasets download -d fournierp/captcha-version-2-images
 
-          mkdir -p assets/source-data/
-          sudo apt-get install unzip
-          unzip captcha-version-2-images.zip -d ./assets/source-data/
+      - name: Save Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: source-data
+          path: captcha-version-2-images.zip
 
-  train-model:
-    runs-on: ubuntu-latest
+  build-dataset:
+    runs-on: self-hosted
     needs: pull
     steps:
       - name: checkout repo
@@ -42,8 +44,49 @@ jobs:
         with:
           path: assets/source-data
           key: source-dataset
+      - name: Download 
+        uses: actions/download-artifact@v3
+        with:
+          name: source-data
 
       - name: train model
         run: |
-          docker build -q -t local .
-          docker run --gpus all -it local python ./main.py
+          mkdir -p assets/source-data/
+          sudo apt-get install unzip
+          unzip captcha-version-2-images.zip -d assets/source-data/
+          docker run --gpus all -it --rm -v "$(docker volume ls -qf name=act-evaluate-build-dataset  | head -n 1):/tmp" -w /tmp tensorflow/tensorflow:latest-gpu python ./build_dataset.py
+          sudo apt install zip
+          zip -r dataset.zip train_dataset validation_dataset
+
+      - name: Save dataset
+        uses: actions/upload-artifact@v3
+        with:
+          name: dataset
+          path: dataset.zip
+
+
+  train-model:
+    runs-on: self-hosted
+    needs: build-dataset
+    steps:
+      - name: checkout repo
+        if: steps.cache-subsets.outputs.cache-hit != 'true'
+        uses: actions/checkout@master  # cwd: /home/runner/work/ahri/ahri
+
+      - name: cache source data
+        if: steps.cache-subsets.outputs.cache-hit != 'true'
+        id: cache-source-data
+        uses: actions/cache@v3
+        with:
+          path: assets/source-data
+          key: source-dataset
+      - name: Download 
+        uses: actions/download-artifact@v3
+        with:
+          name: dataset
+
+      - name: train model
+        run: |
+          sudo apt-get install unzip
+          unzip dataset.zip
+          docker run --gpus all -it --rm -v "$(docker volume ls -qf name=act-evaluate-train-model  | head -n 1):/tmp" -w /tmp tensorflow/tensorflow:latest-gpu python ./main.py
