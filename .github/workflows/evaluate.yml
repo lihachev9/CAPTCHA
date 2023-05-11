@@ -6,9 +6,6 @@ jobs:
     steps:
       # Download dataset
       - name: download source data
-        env:
-          KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
-          KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
         run: |
           curl -LO https://github.com/AakashKumarNain/CaptchaCracker/raw/master/captcha_images_v2.zip
 
@@ -22,6 +19,11 @@ jobs:
     runs-on: self-hosted
     needs: pull
     steps:
+      - name: Download 
+        uses: actions/download-artifact@v3
+        with:
+          name: source-data
+
       - name: train model
         run: |
           python ./build_dataset.py
