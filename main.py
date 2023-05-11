@@ -108,6 +108,7 @@ history = model.fit(
     train_dataset,
     validation_data=validation_dataset,
     epochs=epochs,
+    verbose=2,
     callbacks=[early_stopping],
 )
 
