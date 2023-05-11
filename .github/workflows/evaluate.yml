@@ -25,7 +25,7 @@ jobs:
         with:
           name: source-data
 
-      - name: train model
+      - name: create dataset
         run: |
           7z x captcha_images_v2.zip -aos
           py build_dataset.py

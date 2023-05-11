@@ -1,6 +1,7 @@
 import tensorflow as tf
 from tensorflow import keras
 from keras import layers
+from keras.engine import data_adapter
 
 
 tf.config.run_functions_eagerly(False)
@@ -13,19 +14,19 @@ validation_dataset = tf.data.experimental.load('validation_dataset')
 class SAMModel(tf.keras.Model):
 
     def train_step(self, data):
-        (images, labels) = data
+        x, y, sample_weight = data_adapter.unpack_x_y_sample_weight(data)
         e_ws = []
         with tf.GradientTape() as tape:
-            predictions = self(images)
-            loss = self.compiled_loss(labels, predictions)
+            y_pred = self(x, training=True)
+            loss = self.compute_loss(x, y, y_pred, sample_weight)
         trainable_params = self.trainable_variables
         gradients = tape.gradient(loss, trainable_params)
         grad_norm = self._grad_norm(gradients)
         scale = 0.05 / (grad_norm + 1e-12)
 
         with tf.GradientTape() as tape:
-            predictions = self(images)
-            loss = self.compiled_loss(labels, predictions)    
+            y_pred = self(x, training=True)
+            loss = self.compute_loss(x, y, y_pred, sample_weight)
         for (grad, param) in zip(gradients, trainable_params):
             e_w = grad * scale
             param.assign_add(e_w)
@@ -37,14 +38,14 @@ class SAMModel(tf.keras.Model):
         self.optimizer.apply_gradients(
             zip(sam_gradients, trainable_params))
 
-        self.compiled_metrics.update_state(labels, predictions)
+        self.compiled_metrics.update_state(y, y_pred)
         return {m.name: m.result() for m in self.metrics}
 
     def test_step(self, data):
-        (images, labels) = data
-        predictions = self(images, training=False)
-        self.compiled_metrics.update_state(labels, predictions)
-        return {m.name: m.result() for m in self.metrics}
+        x, y, sample_weight = data_adapter.unpack_x_y_sample_weight(data)
+        y_pred = self(x, training=False)
+        self.compute_loss(x, y, y_pred, sample_weight)
+        return self.compute_metrics(x, y, y_pred, sample_weight)
 
     def _grad_norm(self, gradients):
         norm = tf.norm(
