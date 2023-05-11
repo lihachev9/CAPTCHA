@@ -1,8 +1,6 @@
 
 import os
-
 import numpy as np
-
 import tensorflow as tf
 
 
@@ -83,5 +81,5 @@ validation_dataset = (
     .prefetch(buffer_size=tf.data.AUTOTUNE)
 )
 
-train_dataset.save('train_dataset')
-validation_dataset.save('validation_dataset')
+tf.data.experimental.save(train_dataset, 'train_dataset')
+tf.data.experimental.save(validation_dataset, 'validation_dataset')
