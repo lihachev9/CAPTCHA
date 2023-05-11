@@ -128,16 +128,15 @@ def build_model():
     output = CTCLayer(name="ctc_loss")(labels, x)
 
     # Define the model
-    model = keras.models.Model(
+    model = SAMModel(
         inputs=[input_img, labels], outputs=output, name="ocr_model_v1"
     )
+    model.compile(optimizer='adam')
     return model
 
 
 # Get the model
 model = build_model()
-model = SAMModel(model)
-model.compile(optimizer='adam')
 
 
 epochs = 100
