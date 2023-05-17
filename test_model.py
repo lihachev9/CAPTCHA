@@ -8,9 +8,7 @@ from keras import backend
 def ctc_decode(y_pred):
     input_length = tf.ones(y_pred.shape[0], tf.int32) * y_pred.shape[1]
     y_pred = tf.math.log(tf.transpose(y_pred, perm=[1, 0, 2]) + 1e-7)
-
     (decoded, _) = tf.nn.ctc_greedy_decoder(y_pred, input_length)
-
     return tf.sparse.to_dense(decoded[0])
 
 
@@ -27,7 +25,6 @@ class Accuracy_Captha(keras.metrics.MeanMetricWrapper):
             accuracy_captha, name, dtype=dtype)
 
 
-file = open('result.txt', 'w')
 train_dataset = tf.data.experimental.load('train_dataset')
 validation_dataset = tf.data.experimental.load('validation_dataset')
 model_1 = tf.keras.models.load_model("assets/models/model_predict_1.h5")
@@ -51,10 +48,10 @@ def test_model(model, dataset):
     return m.result().numpy()
 
 
-train_accuracy_1 = test_model(model_1, train_dataset)
-valid_accuracy_1 = test_model(model_1, validation_dataset)
-train_accuracy_2 = test_model(model_2, train_dataset)
-valid_accuracy_2 = test_model(model_2, validation_dataset)
+train_acc_1 = test_model(model_1, train_dataset)
+valid_acc_1 = test_model(model_1, validation_dataset)
+train_acc_2 = test_model(model_2, train_dataset)
+valid_acc_2 = test_model(model_2, validation_dataset)
 
 
 for batch in validation_dataset.take(1):
@@ -69,6 +66,6 @@ start = time.time()
 y_pred = model_2.predict(batch_images, verbose=False)
 result_time_2 = time.time() - start
 
-print('model_1', train_accuracy_1, valid_accuracy_1, result_time_1, file=file)
-print('model_2', train_accuracy_2, valid_accuracy_2, result_time_2, file=file)
-file.close()
+with open('result.txt', 'w') as f:
+    print('model_1', train_acc_1, valid_acc_1, result_time_1, file=f)
+    print('model_2', train_acc_2, valid_acc_2, result_time_2, file=f)

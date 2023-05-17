@@ -190,10 +190,10 @@ model = build_model_1()
 
 
 epochs = 100
-early_stopping_patience = 10
+patience = 10
 # Add early stopping
 early_stopping = keras.callbacks.EarlyStopping(
-    monitor="val_loss", patience=early_stopping_patience, restore_best_weights=True
+    patience=patience, restore_best_weights=True
 )
 
 # Train the model
@@ -220,11 +220,9 @@ prediction_model.save('assets/models/model_predict_1.h5')
 model = build_model_2()
 
 
-epochs = 100
-early_stopping_patience = 10
 # Add early stopping
 early_stopping = keras.callbacks.EarlyStopping(
-    monitor="val_loss", patience=early_stopping_patience, restore_best_weights=True
+    patience=patience, restore_best_weights=True
 )
 
 # Train the model
