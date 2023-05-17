@@ -60,20 +60,26 @@ jobs:
 
   test-model:
     runs-on: self-hosted
-    needs: build-dataset
+    needs: train-model
     steps:
-      - name: Download 
+      - name: Download dataset
+        uses: actions/download-artifact@v3
+        with:
+          name: dataset
+
+      - name: Download model
         uses: actions/download-artifact@v3
         with:
           name: trained-neuron
 
       - name: test model
         run: |
+          7z x trained-neuron.7z -aos
           7z x dataset.7z -aos
           py test_model.py
 
       - name: result
         uses: actions/upload-artifact@v3
         with:
-          name: trained-neuron
+          name: result
           path: result.txt
