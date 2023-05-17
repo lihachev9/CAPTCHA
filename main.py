@@ -78,7 +78,60 @@ class CTCLayer(layers.Layer):
         return y_pred
 
 
-def build_model():
+def build_model_1():
+    # Inputs to the model
+    input_img = layers.Input(
+        shape=(img_width, img_height, 1), name="image", dtype="float32"
+    )
+    labels = layers.Input(name="label", shape=(None,), dtype="float32")
+
+    # First conv block
+    x = layers.Conv2D(
+        16,
+        (3, 3),
+        activation="relu",
+        kernel_initializer="he_normal",
+        padding="same",
+        name="Conv1",
+    )(input_img)
+    x = layers.MaxPooling2D((2, 2), name="pool1")(x)
+
+    # Second conv block
+    x = layers.Conv2D(
+        32,
+        (3, 3),
+        activation="relu",
+        kernel_initializer="he_normal",
+        padding="same",
+        name="Conv2",
+    )(x)
+    x = layers.MaxPooling2D((2, 2), name="pool2")(x)
+
+    new_shape = ((img_width // 4), (img_height // 4) * 32)
+    x = layers.Reshape(target_shape=new_shape, name="reshape")(x)
+    x = layers.Dense(64, activation="relu", name="dense1")(x)
+    x = layers.Dropout(0.2)(x)
+
+    # RNNs
+    x = layers.Bidirectional(layers.LSTM(64, return_sequences=True, dropout=0.25))(x)
+
+    # Output layer
+    x = layers.Dense(
+        21, activation="softmax", name="dense2"
+    )(x)
+
+    # Add CTC layer for calculating CTC loss at each step
+    output = CTCLayer(name="ctc_loss")(labels, x)
+
+    # Define the model
+    model = SAMModel(
+        inputs=[input_img, labels], outputs=output, name="ocr_model_v1"
+    )
+    model.compile(optimizer='adam')
+    return model
+
+
+def build_model_2():
     # Inputs to the model
     input_img = layers.Input(
         shape=(img_width, img_height, 1), name="image", dtype="float32"
@@ -107,10 +160,6 @@ def build_model():
     )(x)
     x = layers.MaxPooling2D((2, 2), name="pool2")(x)
 
-    # We have used two max pool with pool size and strides 2.
-    # Hence, downsampled feature maps are 4x smaller. The number of
-    # filters in the last layer is 64. Reshape accordingly before
-    # passing the output to the RNN part of the model
     new_shape = ((img_width // 4), (img_height // 4) * 64)
     x = layers.Reshape(target_shape=new_shape, name="reshape")(x)
     x = layers.Dense(64, activation="relu", name="dense1")(x)
@@ -137,7 +186,7 @@ def build_model():
 
 
 # Get the model
-model = build_model()
+model = build_model_1()
 
 
 epochs = 100
@@ -164,5 +213,35 @@ prediction_model = keras.models.Model(
 prediction_model.summary()
 
 # Save the models
-model.save('assets/models/train_model.h5')
-prediction_model.save('assets/models/model_predict.h5')
+prediction_model.save('assets/models/model_predict_1.h5')
+
+
+# Get the model
+model = build_model_2()
+
+
+epochs = 100
+early_stopping_patience = 10
+# Add early stopping
+early_stopping = keras.callbacks.EarlyStopping(
+    monitor="val_loss", patience=early_stopping_patience, restore_best_weights=True
+)
+
+# Train the model
+history = model.fit(
+    train_dataset,
+    validation_data=validation_dataset,
+    epochs=epochs,
+    verbose=2,
+    callbacks=[early_stopping],
+)
+
+# Get the prediction model by extracting layers till the output layer
+prediction_model = keras.models.Model(
+    model.get_layer(name="image").input,
+    model.get_layer(name="dense2").output
+)
+prediction_model.summary()
+
+# Save the models
+prediction_model.save('assets/models/model_predict_2.h5')

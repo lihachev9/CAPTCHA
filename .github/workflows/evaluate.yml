@@ -29,7 +29,7 @@ jobs:
         run: |
           7z x captcha_images_v2.zip -aos
           py build_dataset.py
-          7z a dataset.7z train_dataset validation_dataset
+          7z a dataset.7z train_dataset validation_dataset -sdel
 
       - name: Save dataset
         uses: actions/upload-artifact@v3
@@ -50,9 +50,30 @@ jobs:
         run: |
           7z x dataset.7z -aos
           py main.py
+          7z a trained-neuron.7z assets -sdel
 
       - name: trained model
         uses: actions/upload-artifact@v3
         with:
           name: trained-neuron
-          path: assets/models
+          path: trained-neuron.7z
+
+  test-model:
+    runs-on: self-hosted
+    needs: build-dataset
+    steps:
+      - name: Download 
+        uses: actions/download-artifact@v3
+        with:
+          name: trained-neuron
+
+      - name: test model
+        run: |
+          7z x dataset.7z -aos
+          py test_model.py
+
+      - name: result
+        uses: actions/upload-artifact@v3
+        with:
+          name: trained-neuron
+          path: result.txt
