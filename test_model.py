@@ -9,7 +9,7 @@ def ctc_decode(y_pred):
     input_length = tf.ones(y_pred.shape[0], tf.int32) * y_pred.shape[1]
     y_pred = tf.math.log(tf.transpose(y_pred, perm=[1, 0, 2]) + 1e-7)
     (decoded, _) = tf.nn.ctc_greedy_decoder(y_pred, input_length)
-    return tf.sparse.to_dense(decoded[0])
+    return tf.sparse.to_dense(decoded[0])[:, :5]
 
 
 def accuracy_captha(y_true, y_pred):
@@ -41,7 +41,7 @@ def test_model(model, dataset):
 
     X_test, y_test = np.array(X_test), np.array(y_test)
 
-    y_pred = model.predict(X_test)
+    y_pred = model.predict(X_test, verbose=False)
 
     m = Accuracy_Captha()
     m.update_state(y_test, y_pred)
