@@ -8,6 +8,8 @@ train_dataset = tf.data.experimental.load('train_dataset')
 validation_dataset = tf.data.experimental.load('validation_dataset')
 model_1 = tf.keras.models.load_model("assets/models/model_1")
 model_2 = tf.keras.models.load_model("assets/models/model_2")
+model_1.predict(np.random.rand(1, 200, 50, 1), verbose=False)
+model_2.predict(np.random.rand(1, 200, 50, 1), verbose=False)
 
 
 def test_model(model, dataset):
@@ -21,9 +23,9 @@ def test_model(model, dataset):
 
     X_test, y_test = np.array(X_test), np.array(y_test)
 
-    start = time.perf_counter()
+    start = time.time()
     y_pred = model.predict(X_test, verbose=False)
-    result_time_1 = (time.perf_counter() - start) * 1000
+    result_time_1 = time.time() - start
 
     m = WER()
     m.update_state(y_test, y_pred)
