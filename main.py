@@ -73,7 +73,7 @@ def build_model_1():
 
     # Define the model
     model = keras.models.Model(
-        inputs=[input_img, labels], outputs=output, name="ocr_model_v1"
+        inputs=input_img, outputs=output, name="ocr_model_v1"
     )
     model.compile(
         optimizer='adam',
