@@ -2,10 +2,9 @@ import tensorflow as tf
 from tensorflow import keras
 from keras import layers
 from metrics import Accuracy_Captha
+from config import img_width, img_height
 
 
-img_width = 200
-img_height = 50
 train_dataset = tf.data.experimental.load('train_dataset')
 validation_dataset = tf.data.experimental.load('validation_dataset')
 
@@ -88,7 +87,6 @@ def build_model_2():
     input_img = layers.Input(
         shape=(img_width, img_height, 1), name="image", dtype="float32"
     )
-    labels = layers.Input(name="label", shape=(None,), dtype="float32")
 
     # First conv block
     x = layers.Conv2D(
@@ -128,7 +126,7 @@ def build_model_2():
 
     # Define the model
     model = keras.models.Model(
-        inputs=[input_img, labels], outputs=output, name="ocr_model_v1"
+        inputs=input_img, outputs=output, name="ocr_model_v1"
     )
     model.compile(
         optimizer='adam',
