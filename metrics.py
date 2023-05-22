@@ -1,5 +1,4 @@
 import tensorflow as tf
-from keras import backend
 from config import max_length
 
 
@@ -24,10 +23,12 @@ def accuracy_captha(y_true, y_pred):
     y_pred = ctc_decode(y_pred)
     y_true = tf.cast(y_true, tf.int64)
     values = tf.math.reduce_all(tf.math.equal(y_true, y_pred), range(1, len(y_true.shape)))
-    return tf.cast(values, backend.floatx())
+    values = False == values
+    values = tf.cast(values, tf.float32)
+    return values
 
 
-class Accuracy_Captha(tf.keras.metrics.MeanMetricWrapper):
-    def __init__(self, name='accuracy_captha', dtype=None):
-        super(Accuracy_Captha, self).__init__(
+class WER(tf.keras.metrics.MeanMetricWrapper):
+    def __init__(self, name='WER', dtype=None):
+        super(WER, self).__init__(
             accuracy_captha, name, dtype=dtype)

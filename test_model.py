@@ -1,7 +1,7 @@
 import time
 import numpy as np
 import tensorflow as tf
-from metrics import Accuracy_Captha
+from metrics import WER
 
 
 train_dataset = tf.data.experimental.load('train_dataset')
@@ -21,30 +21,20 @@ def test_model(model, dataset):
 
     X_test, y_test = np.array(X_test), np.array(y_test)
 
+    start = time.perf_counter()
     y_pred = model.predict(X_test, verbose=False)
+    result_time_1 = (time.perf_counter() - start) * 1000
 
-    m = Accuracy_Captha()
+    m = WER()
     m.update_state(y_test, y_pred)
-    return m.result().numpy()
+    return m.result().numpy(), result_time_1
 
 
-train_acc_1 = test_model(model_1, train_dataset)
-valid_acc_1 = test_model(model_1, validation_dataset)
-train_acc_2 = test_model(model_2, train_dataset)
-valid_acc_2 = test_model(model_2, validation_dataset)
+train_acc_1, result_time_1 = test_model(model_1, train_dataset)
+valid_acc_1, _ = test_model(model_1, validation_dataset)
+train_acc_2, result_time_2 = test_model(model_2, train_dataset)
+valid_acc_2, _ = test_model(model_2, validation_dataset)
 
-
-for batch in validation_dataset.take(1):
-    batch_images = batch["image"]
-    batch_labels = batch["label"]
-
-start = time.perf_counter()
-y_pred = model_1.predict(batch_images, verbose=False)
-result_time_1 = (time.perf_counter() - start) * 1000
-
-start = time.time()
-y_pred = model_2.predict(batch_images, verbose=False)
-result_time_2 = (time.perf_counter() - start) * 1000
 
 with open('result.txt', 'w') as f:
     print('model_1', train_acc_1, valid_acc_1, result_time_1, file=f)

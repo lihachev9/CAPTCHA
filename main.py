@@ -1,9 +1,8 @@
 import tensorflow as tf
 from tensorflow import keras
 from keras import layers
-from metrics import Accuracy_Captha
+from metrics import WER
 from config import img_width, img_height
-from sammodel import SAMModel
 
 
 train_dataset = tf.data.experimental.load('train_dataset')
@@ -72,13 +71,13 @@ def build_model_1():
     )(x)
 
     # Define the model
-    model = SAMModel(
+    model = keras.models.Model(
         inputs=input_img, outputs=output, name="ocr_model_v1"
     )
     model.compile(
         optimizer='adam',
         loss=CTCloss(),
-        metrics=[Accuracy_Captha()]
+        metrics=[WER()]
     )
     return model
 
@@ -126,13 +125,13 @@ def build_model_2():
     )(x)
 
     # Define the model
-    model = SAMModel(
-        inputs=input_img, outputs=output, name="ocr_model_v1"
+    model = keras.models.Model(
+        inputs=input_img, outputs=output, name="ocr_model_v2"
     )
     model.compile(
         optimizer='adam',
         loss=CTCloss(),
-        metrics=[Accuracy_Captha()]
+        metrics=[WER()]
     )
     return model
 
