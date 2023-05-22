@@ -15,8 +15,9 @@ def test_model(model, dataset):
     y_test = []
 
     for batch in dataset:
-        X_test.extend(batch["image"])
-        y_test.extend(batch["label"])
+        image, label = batch
+        X_test.extend(image)
+        y_test.extend(label)
 
     X_test, y_test = np.array(X_test), np.array(y_test)
 
@@ -37,13 +38,13 @@ for batch in validation_dataset.take(1):
     batch_images = batch["image"]
     batch_labels = batch["label"]
 
-start = time.time()
+start = time.perf_counter()
 y_pred = model_1.predict(batch_images, verbose=False)
-result_time_1 = time.time() - start
+result_time_1 = (time.perf_counter() - start) * 1000
 
 start = time.time()
 y_pred = model_2.predict(batch_images, verbose=False)
-result_time_2 = time.time() - start
+result_time_2 = (time.perf_counter() - start) * 1000
 
 with open('result.txt', 'w') as f:
     print('model_1', train_acc_1, valid_acc_1, result_time_1, file=f)

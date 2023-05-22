@@ -3,6 +3,7 @@ from tensorflow import keras
 from keras import layers
 from metrics import Accuracy_Captha
 from config import img_width, img_height
+from sammodel import SAMModel
 
 
 train_dataset = tf.data.experimental.load('train_dataset')
@@ -71,7 +72,7 @@ def build_model_1():
     )(x)
 
     # Define the model
-    model = keras.models.Model(
+    model = SAMModel(
         inputs=input_img, outputs=output, name="ocr_model_v1"
     )
     model.compile(
@@ -125,7 +126,7 @@ def build_model_2():
     )(x)
 
     # Define the model
-    model = keras.models.Model(
+    model = SAMModel(
         inputs=input_img, outputs=output, name="ocr_model_v1"
     )
     model.compile(
