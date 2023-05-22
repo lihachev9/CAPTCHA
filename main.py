@@ -35,7 +35,6 @@ def build_model_1():
     input_img = layers.Input(
         shape=(img_width, img_height, 1), name="image", dtype="float32"
     )
-    labels = layers.Input(name="label", shape=(None,), dtype="float32")
 
     # First conv block
     x = layers.Conv2D(
