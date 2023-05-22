@@ -54,7 +54,7 @@ def encode_single_sample(img_path, label):
     # 6. Map the characters in label to numbers
     label = char_to_num(tf.strings.unicode_split(label, input_encoding="UTF-8"))
     # 7. Return a dict as our model is expecting two inputs
-    return {"image": img, "label": label}
+    return img, label
 
 
 train_dataset = tf.data.Dataset.from_tensor_slices((x_train, y_train))

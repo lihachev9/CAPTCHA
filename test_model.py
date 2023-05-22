@@ -1,28 +1,7 @@
 import time
 import numpy as np
 import tensorflow as tf
-from tensorflow import keras
-from keras import backend
-
-
-def ctc_decode(y_pred):
-    input_length = tf.ones(y_pred.shape[0], tf.int32) * y_pred.shape[1]
-    y_pred = tf.math.log(tf.transpose(y_pred, perm=[1, 0, 2]) + 1e-7)
-    (decoded, _) = tf.nn.ctc_greedy_decoder(y_pred, input_length)
-    return tf.sparse.to_dense(decoded[0])[:, :5]
-
-
-def accuracy_captha(y_true, y_pred):
-    y_pred = ctc_decode(y_pred)
-    y_true = tf.cast(y_true, tf.int64)
-    values = tf.math.reduce_all(tf.math.equal(y_true, y_pred), range(1, len(y_true.shape)))
-    return tf.cast(values, backend.floatx())
-
-
-class Accuracy_Captha(keras.metrics.MeanMetricWrapper):
-    def __init__(self, name='accuracy_captha', dtype=None):
-        super(Accuracy_Captha, self).__init__(
-            accuracy_captha, name, dtype=dtype)
+from metrics import Accuracy_Captha
 
 
 train_dataset = tf.data.experimental.load('train_dataset')
