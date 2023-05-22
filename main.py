@@ -164,12 +164,10 @@ prediction_model = keras.models.Model(
 prediction_model.summary()
 
 # Save the models
-prediction_model.save('assets/models/model_predict_1.h5')
-
+prediction_model.save('assets/models/model_1')
 
 # Get the model
 model = build_model_2()
-
 
 # Add early stopping
 early_stopping = keras.callbacks.EarlyStopping(
@@ -193,4 +191,4 @@ prediction_model = keras.models.Model(
 prediction_model.summary()
 
 # Save the models
-prediction_model.save('assets/models/model_predict_2.h5')
+prediction_model.save('assets/models/model_2')
