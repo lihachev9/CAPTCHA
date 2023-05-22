@@ -6,8 +6,8 @@ from metrics import WER
 
 train_dataset = tf.data.experimental.load('train_dataset')
 validation_dataset = tf.data.experimental.load('validation_dataset')
-model_1 = tf.keras.models.load_model("assets/models/model_predict_1.h5")
-model_2 = tf.keras.models.load_model("assets/models/model_predict_2.h5")
+model_1 = tf.keras.models.load_model("assets/models/model_1")
+model_2 = tf.keras.models.load_model("assets/models/model_2")
 
 
 def test_model(model, dataset):
