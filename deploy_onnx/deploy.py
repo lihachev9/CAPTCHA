@@ -11,6 +11,7 @@ input_name = sess.get_inputs()[0].name
 
 max_length = 5
 characters = ['2', '3', '4', '5', '6', '7', '8', 'b', 'c', 'd', 'e', 'f', 'g', 'm', 'n', 'p', 'w', 'x', 'y']
+img_height, img_width = 200, 50
 
 
 def get_result(pred):
@@ -36,13 +37,12 @@ def get_result(pred):
 
 
 @app.post("/predict")
-def predict(file_bytes: bytes = File(description="A file read as bytes")):
-    print(len(file_bytes))
+def predict(file_bytes: bytes = File()):
     array_data = np.asarray(bytearray(file_bytes), dtype=np.uint8)
     img = cv2.imdecode(array_data, -1)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     img = img / 255
-    img = cv2.resize(img, (200, 50))
+    img = cv2.resize(img, (img_height, img_width))
     img = cv2.transpose(img)
     img = np.array(img, np.float32)
     img = np.expand_dims(img, axis=(0, -1))
