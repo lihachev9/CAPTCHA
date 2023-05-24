@@ -1,5 +1,6 @@
 name: evaluate
-on: [push]
+on: 
+  workflow_dispatch:
 jobs:
   pull:
     runs-on: ubuntu-latest
@@ -29,13 +30,14 @@ jobs:
         run: |
           7z x captcha_images_v2.zip -aos
           py build_dataset.py
-          7z a dataset.7z train_dataset validation_dataset -sdel
 
       - name: Save dataset
         uses: actions/upload-artifact@v3
         with:
           name: dataset
-          path: dataset.7z
+          path: |
+            train_dataset
+            validation_dataset
 
   train-model:
     runs-on: self-hosted
@@ -83,3 +85,16 @@ jobs:
         with:
           name: result
           path: result.txt
+
+  deploy-mpdel:
+      runs-on: self-hosted
+      needs: test-model
+      steps:
+        - name: Download model
+          uses: actions/download-artifact@v3
+          with:
+            name: trained-neuron
+        - name: test model
+          run: |
+            7z x trained-neuron.7z -aos
+      

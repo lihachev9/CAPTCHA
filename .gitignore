@@ -1,0 +1,4 @@
+assets/
+captcha_images_v2/
+*.onnx
+model/

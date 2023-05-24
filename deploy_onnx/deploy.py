@@ -51,4 +51,4 @@ def predict(file_bytes: bytes = File()):
 
     answer = get_result(pred_onx)
 
-    return {"prediction": answer}
+    return {"predictions": answer}
