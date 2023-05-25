@@ -49,4 +49,4 @@ def predict(file_bytes: bytes = File()):
     pred = model.predict(img, verbose=False)
 
     answer = get_result(pred)
-    return {"prediction": answer}
+    return {"predictions": answer}

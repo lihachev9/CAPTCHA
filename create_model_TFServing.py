@@ -2,11 +2,11 @@ import tensorflow as tf
 from config import max_length
 
 
-max_length = 5
 model_dir = "./model"
+model_sig_version = 2
 characters = ['[UNK]', '2', '3', '4', '5', '6', '7', '8', 'b', 'c', 'd', 'e', 'f', 'g', 'm', 'n', 'p', 'w', 'x', 'y']
 label2_layer = tf.keras.layers.StringLookup(vocabulary=characters, mask_token=None, invert=True)
-model = tf.keras.models.load_model('assets\models\model_1')
+model = tf.keras.models.load_model('assets/models/model_1')
 
 
 class TFModel(tf.Module):
@@ -24,11 +24,11 @@ class TFModel(tf.Module):
         img = tf.image.resize(img, shape)
         # 5. Transpose the image because we want the time
         # dimension to correspond to the width of the image.
-        img = tf.transpose(img, perm=[1, 0, 2])#perm=[0, 2, 1, 3])
+        img = tf.transpose(img, perm=[1, 0, 2])
         # 6. Expend dimns img as batch
         img = tf.expand_dims(img, axis=0)
         return img
-    
+
     def postprocess(self, y_pred):
         input_shape = tf.shape(y_pred)
         num_samples, num_steps = input_shape[0], input_shape[1]
@@ -48,7 +48,7 @@ class TFModel(tf.Module):
         return aws
 
     def f(self):
-        @tf.function#(input_signature=[tf.TensorSpec([None], tf.string)])
+        @tf.function
         def serving_fn(image):
             processed_img = self.preprocess(image)
             probs = self.model(processed_img)
@@ -57,7 +57,6 @@ class TFModel(tf.Module):
         return serving_fn
 
 
-model_sig_version = 2
 model_sig_export_path = f"{model_dir}/{model_sig_version}"
 tf_model_wrapper = TFModel(model)
 # trying to create concrete_function as mentioned on github issue
@@ -96,7 +95,7 @@ def preprocess_bytes(file_bytes, shape=(50, 200)):
     img = tf.image.resize(img, shape)
     # 5. Transpose the image because we want the time
     # dimension to correspond to the width of the image.
-    img = tf.transpose(img, perm=[1, 0, 2])#perm=[0, 2, 1, 3])
+    img = tf.transpose(img, perm=[1, 0, 2])
     # 6. Expend dimns img as batch
     img = tf.expand_dims(img, axis=0)
     return img
@@ -115,7 +114,7 @@ def preprocess_RGB(image, shape=(50, 200)):
     return img
 
 
-def export_model_1(model):
+def export_model_bytes(model):
     @tf.function(input_signature=[tf.TensorSpec(None, tf.string)])
     def serving_fn(image):
         processed_img = preprocess_bytes(image)
@@ -126,7 +125,7 @@ def export_model_1(model):
     return serving_fn
 
 
-def export_model_2(model):
+def export_model_default(model):
     @tf.function(input_signature=[tf.TensorSpec([None, None, None, 3], tf.uint8)])
     def serving_fn(image):
         processed_img = preprocess_RGB(image)
@@ -143,6 +142,6 @@ model_sig_export_path = f"{model_dir}/{model_sig_version}"
 tf.saved_model.save(
     model,
     export_dir=model_sig_export_path,
-    signatures={"serving_default": export_model_2(model),
-                'serving_bytes': export_model_1(model)},
+    signatures={"serving_default": export_model_default(model),
+                'serving_bytes': export_model_bytes(model)},
 )
