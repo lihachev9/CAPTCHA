@@ -48,15 +48,13 @@ jobs:
 
       - name: train model
         run: |
-          7z x dataset.7z -aos
           python main.py
-          7z a trained-neuron.7z assets -sdel
 
       - name: trained model
         uses: actions/upload-artifact@v3
         with:
           name: trained-neuron
-          path: trained-neuron.7z
+          path: assets
 
   test-model:
     runs-on: self-hosted
@@ -74,8 +72,6 @@ jobs:
 
       - name: test model
         run: |
-          7z x trained-neuron.7z -aos
-          7z x dataset.7z -aos
           python test_model.py
 
       - name: result
@@ -92,11 +88,10 @@ jobs:
           uses: actions/download-artifact@v3
           with:
             name: trained-neuron
+
         - name: deploy tf model
           run: |
-            7z x trained-neuron.7z -aos
             python create_model_TFServing.py
-            docker pull tensorflow/serving
             docker run -d -p 8501:8501 -v "$pwd/model:/models/model" -e MODEL_NAME=model -t tensorflow/serving
 
   optimization-quantization:
@@ -107,14 +102,15 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: trained-neuron
+
       - name: Download source data
         uses: actions/download-artifact@v3
         with:
           name: source-data
+
       - name: convert tf model to onnx quantization and deploy
         run: |
-          7z x trained-neuron.7z -aos
           python -m tf2onnx.convert --saved-model assets/models/model_1 --output deploy_onnx/model.onnx
           python quantization.py
-          docker build -f deploy_onnx/Dockerfile -t local .
-          docker run -d -p 8000:8000 local
+          docker build -f deploy_onnx/Dockerfile -t onnx_captcha_solver .
+          docker run -d -p 8000:8000 onnx_captcha_solver
