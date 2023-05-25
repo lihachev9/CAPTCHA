@@ -6,7 +6,7 @@ from fastapi import FastAPI, File
 
 app = FastAPI()
 
-sess = rt.InferenceSession("model.onnx")
+sess = rt.InferenceSession("model.quant.onnx")
 input_name = sess.get_inputs()[0].name
 
 max_length = 5
