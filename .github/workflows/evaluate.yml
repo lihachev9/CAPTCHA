@@ -28,14 +28,13 @@ jobs:
         run: |
           7z x captcha_images_v2.zip -aos
           python build_dataset.py
+          7z a dataset.7z train_dataset validation_dataset
 
       - name: Save dataset
         uses: actions/upload-artifact@v3
         with:
           name: dataset
-          path: |
-            train_dataset
-            validation_dataset
+          path: dataset.7z
 
   train-model:
     runs-on: self-hosted
@@ -48,13 +47,15 @@ jobs:
 
       - name: train model
         run: |
+          7z x dataset.7z -aos
           python main.py
+          7z a trained-neuron.7z assets -sdel
 
       - name: trained model
         uses: actions/upload-artifact@v3
         with:
           name: trained-neuron
-          path: assets
+          path: trained-neuron.7z
 
   test-model:
     runs-on: self-hosted
@@ -72,6 +73,8 @@ jobs:
 
       - name: test model
         run: |
+          7z x trained-neuron.7z -aos
+          7z x dataset.7z -aos
           python test_model.py
 
       - name: result
@@ -91,6 +94,7 @@ jobs:
 
         - name: deploy tf model
           run: |
+            7z x trained-neuron.7z -aos
             python create_model_TFServing.py
             docker run -d -p 8501:8501 -v "$pwd/model:/models/model" -e MODEL_NAME=model -t tensorflow/serving
 
@@ -110,6 +114,8 @@ jobs:
 
       - name: convert tf model to onnx quantization and deploy
         run: |
+          7z x trained-neuron.7z -aos
+          7z x captcha_images_v2.zip -aos
           python -m tf2onnx.convert --saved-model assets/models/model_1 --output deploy_onnx/model.onnx
           python quantization.py
           docker build -f deploy_onnx/Dockerfile -t onnx_captcha_solver .
